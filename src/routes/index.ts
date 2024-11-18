@@ -38,9 +38,10 @@ router.get("/jwt/:jwt", async (req, res) => {
     }
 
     res.cookie("NFT_JWT", req.params.jwt, {
-      // domain: ".vercel.app",
+      domain: ".vercel.app",
       httpOnly: true,
       secure: true,
+      sameSite: "None"
     });
     return res.redirect(result[0].url);
   } catch (error) {
