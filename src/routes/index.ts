@@ -37,7 +37,7 @@ router.get("/jwt/:jwt", async (req, res) => {
       });
     }
 
-    res.cookie('Bearer', req.params.jwt, { domain: 'b9b5-186-209-202-32.ngrok-free.app' });
+    res.cookie('NFT_JWT', req.params.jwt, { domain: 'b9b5-186-209-202-32.ngrok-free.app' });
     return res.redirect(result[0].url);
   } catch (error) {
     console.error(error);
