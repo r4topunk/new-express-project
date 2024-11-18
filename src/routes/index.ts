@@ -37,7 +37,8 @@ router.get("/jwt/:jwt", async (req, res) => {
       });
     }
 
-    return res.redirect(result[0].url);
+    res.cookie('Bearer', req.params.jwt, { httpOnly: true });
+    return res.redirect(`https://b9b5-186-209-202-32.ngrok-free.app`);
   } catch (error) {
     console.error(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
