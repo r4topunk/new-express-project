@@ -38,7 +38,7 @@ router.get("/jwt/:jwt", async (req, res) => {
     }
 
     res.cookie("NFT_JWT", req.params.jwt, {
-      domain: "b9b5-186-209-202-32.ngrok-free.app",
+      domain: ".ngrok-free.app",
       httpOnly: true,
       secure: true,
     });
