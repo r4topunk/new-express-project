@@ -37,13 +37,9 @@ router.get("/jwt/:jwt", async (req, res) => {
       });
     }
 
-    res.cookie("NFT_JWT", req.params.jwt, {
-      domain: ".vercel.app",
-      httpOnly: true,
-      secure: true,
-      sameSite: "None"
-    });
-    return res.redirect(result[0].url);
+    const redirectUrl = new URL(result[0].url);
+    redirectUrl.searchParams.set("NFT_JWT", req.params.jwt);
+    return res.redirect(redirectUrl.toString());
   } catch (error) {
     console.error(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
