@@ -5,7 +5,7 @@ import httpStatus from "http-status";
 
 import { db } from "../drizzle/index";
 import { redirects } from "../drizzle/schema/redirects";
-import { decodeJWT } from "../utils/JWTRoutes";
+import { decodeJWT, encodeJWT } from "../utils/JWTRoutes";
 import "dotenv/config";
 
 const router = express.Router();
@@ -37,8 +37,24 @@ router.get("/jwt/:jwt", async (req, res) => {
       });
     }
 
-    const redirectUrl = new URL(result[0].url);
-    redirectUrl.searchParams.set("NFT_JWT", req.params.jwt);
+    const nfc = result[0];
+
+    const outData = {
+      chainId: nfc.chainId,
+      phygital: {
+        address: nfc.phyditalContract,
+        tokenId: nfc.phyditalTokenId,
+      },
+      poap: {
+        address: nfc.poapContract,
+        tokenId: nfc.poapTokenId,
+      },
+    };
+
+    const redirectUrl = new URL(nfc.url);
+    const jwtData = encodeJWT(outData);
+    redirectUrl.searchParams.set("NFT_JWT", jwtData);
+
     return res.redirect(redirectUrl.toString());
   } catch (error) {
     console.error(error);
