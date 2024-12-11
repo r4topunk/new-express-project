@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "tsx ./api/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "drizzle:generate": "drizzle-kit generate:pg",
+    "drizzle:generate": "drizzle-kit generate",
     "drizzle:push": "drizzle-kit push",
     "drizzle:seed": "tsx ./src/drizzle/seed.ts"
   },
