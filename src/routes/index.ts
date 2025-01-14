@@ -9,14 +9,6 @@ import { decodeJWT, encodeJWT, JWTCustomToken } from "../utils/JWTRoutes";
 import "dotenv/config";
 import { authenticateJWT } from "../middlewares/jwtAuth";
 
-declare global {
-  namespace Express {
-    interface Request {
-      jwt?: JWTCustomToken;
-    }
-  }
-}
-
 const router = express.Router();
 
 /**

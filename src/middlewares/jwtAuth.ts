@@ -1,5 +1,13 @@
 import { Request, Response, NextFunction } from "express";
-import { decodeJWT } from "../utils/JWTRoutes";
+import { decodeJWT, JWTCustomToken } from "../utils/JWTRoutes";
+
+declare global {
+  namespace Express {
+    interface Request {
+      jwt?: JWTCustomToken;
+    }
+  }
+}
 
 export function authenticateJWT(
   req: Request,
