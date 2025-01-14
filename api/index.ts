@@ -8,7 +8,7 @@ import { errorHandler } from "../src/middlewares/handleError";
 import routes from "../src/routes/index";
 
 const appName = "moncy-express-ts-starter";
-const preferredPortNumber = 3001;
+const preferredPortNumber = 3000;
 
 const app = express();
 
