@@ -5,8 +5,17 @@ import httpStatus from "http-status";
 
 import { db } from "../drizzle/index";
 import { redirects } from "../drizzle/schema/redirects";
-import { decodeJWT, encodeJWT } from "../utils/JWTRoutes";
+import { decodeJWT, encodeJWT, JWTCustomToken } from "../utils/JWTRoutes";
 import "dotenv/config";
+import { authenticateJWT } from "../middlewares/jwtAuth";
+
+declare global {
+  namespace Express {
+    interface Request {
+      jwt?: JWTCustomToken;
+    }
+  }
+}
 
 const router = express.Router();
 
@@ -62,6 +71,12 @@ router.get("/jwt/:jwt", async (req, res) => {
       message: "An error occurred",
     });
   }
+});
+
+router.get("/auth", authenticateJWT, async (req, res) => {
+  return res.status(httpStatus.OK).json({
+    message: "You are authenticated " + req.jwt?.uuid,
+  });
 });
 
 export default router;
