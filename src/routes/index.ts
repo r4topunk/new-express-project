@@ -71,4 +71,24 @@ router.get("/auth", authenticateJWT, async (req, res) => {
   });
 });
 
+router.get("/routes", authenticateJWT, async (req, res) => {
+  try {
+    const result = await db.select().from(redirects);
+
+    const BASE_HOST = `${req.protocol}://${req.get("host")}`;
+    const buildLink = (jwt: Record<string, any>) =>
+      `${BASE_HOST}/jwt/${encodeJWT({ uuid: jwt.uuid })}`;
+    const results = result.map((row) => ({
+      ...row,
+      link: buildLink(row),
+    }));
+    res.status(httpStatus.OK).json(results);
+  } catch (error) {
+    console.error(error);
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: "An error occurred",
+    });
+  }
+});
+
 export default router;
