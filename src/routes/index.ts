@@ -93,6 +93,32 @@ router.get("/redirects", authenticateJWT, async (req, res) => {
   }
 });
 
+router.post("/redirects", authenticateJWT, async (req, res) => {
+  try {
+    const redirectsData = req.body;
+
+    if (!Array.isArray(redirectsData) || redirectsData.length === 0) {
+      return res.status(httpStatus.BAD_REQUEST).json({
+        message: "Invalid input data",
+        data: null,
+      });
+    }
+
+    const result = await db.insert(redirects).values(redirectsData).returning();
+
+    return res.status(httpStatus.CREATED).json({
+      message: "Redirects inserted successfully",
+      data: result,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: "An error occurred",
+      data: null,
+    });
+  }
+});
+
 router.put("/redirects/:uuid", authenticateJWT, async (req, res) => {
   try {
     const { uuid } = req.params;
