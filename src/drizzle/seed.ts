@@ -1,14 +1,16 @@
-import { db } from '../drizzle';
-import { redirects } from './schema/redirects';
+import { db } from "../drizzle";
+import { redirects } from "./schema/redirects";
 
 async function seed() {
-  for (let i = 0; i < 50; i++) {
-    console.log("inserting", i)
-    await db.insert(redirects).values({ url: 'https://ss-tm.xyz' });
+  for (let i = 0; i < 10; i++) {
+    console.log("inserting", i);
+    await db
+      .insert(redirects)
+      .values({ url: "https://www.t0fu.com.br/?to=NTS" });
   }
 
-  console.log('Seeding...');
-  console.time('DB has been seeded!');
+  console.log("Seeding...");
+  console.time("DB has been seeded!");
 }
 
 seed()
@@ -17,6 +19,6 @@ seed()
     process.exit(1);
   })
   .finally(async () => {
-    console.log('Seeding done!');
+    console.log("Seeding done!");
     process.exit(0);
   });
