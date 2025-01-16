@@ -71,10 +71,12 @@ router.get("/auth", authenticateJWT, async (req, res) => {
   });
 });
 
-router.get("/routes", authenticateJWT, async (req, res) => {
+router.get("/redirects", authenticateJWT, async (req, res) => {
   try {
-    const result = await db.select().from(redirects);
-
+    const result = await db
+      .select()
+      .from(redirects)
+      .orderBy(redirects.createdAt);
     const BASE_HOST = `${req.protocol}://${req.get("host")}`;
     const buildLink = (jwt: Record<string, any>) =>
       `${BASE_HOST}/jwt/${encodeJWT({ uuid: jwt.uuid })}`;
@@ -87,6 +89,37 @@ router.get("/routes", authenticateJWT, async (req, res) => {
     console.error(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: "An error occurred",
+    });
+  }
+});
+
+router.put("/redirects/:uuid", authenticateJWT, async (req, res) => {
+  try {
+    const { uuid } = req.params;
+    const updateData = req.body;
+
+    const result = await db
+      .update(redirects)
+      .set(updateData)
+      .where(eq(redirects.uuid, uuid))
+      .returning();
+
+    if (!result) {
+      return res.status(httpStatus.NOT_FOUND).json({
+        message: "Redirect not found",
+        data: null,
+      });
+    }
+
+    return res.status(httpStatus.OK).json({
+      message: "Redirect updated successfully",
+      data: result,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: "An error occurred",
+      data: null,
     });
   }
 });
