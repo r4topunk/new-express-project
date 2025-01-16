@@ -105,10 +105,17 @@ router.post("/redirects", authenticateJWT, async (req, res) => {
     }
 
     const result = await db.insert(redirects).values(redirectsData).returning();
+    const BASE_HOST = `${req.protocol}://${req.get("host")}`;
+    const buildLink = (uuid: string) =>
+      `${BASE_HOST}/jwt/${encodeJWT({ uuid })}`;
+    const resultsWithLinks = result.map((row) => ({
+      ...row,
+      link: buildLink(row.uuid),
+    }));
 
     return res.status(httpStatus.CREATED).json({
       message: "Redirects inserted successfully",
-      data: result,
+      data: resultsWithLinks,
     });
   } catch (error) {
     console.error(error);
