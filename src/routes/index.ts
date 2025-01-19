@@ -3,17 +3,12 @@ import express from "express";
 import "express-async-errors";
 import httpStatus from "http-status";
 
+import "dotenv/config";
 import { db } from "../drizzle/index";
 import { redirects } from "../drizzle/schema/redirects";
-import {
-  decodeJWT,
-  encodeJWT,
-  encodeJWTWithExpiry,
-  JWTCustomToken,
-} from "../utils/JWTRoutes";
-import "dotenv/config";
-import { authenticateJWT } from "../middlewares/jwtAuth";
 import { users } from "../drizzle/schema/users";
+import { authenticateJWT } from "../middlewares/jwtAuth";
+import { decodeJWT, encodeJWT, JWTCustomToken } from "../utils/JWTRoutes";
 
 const router = express.Router();
 
@@ -94,15 +89,13 @@ router.get("/jwt/:jwt", async (req, res) => {
       } else {
         if (userExists) {
           console.log("Setting cookie for poap claiming");
-          const data = encodeJWTWithExpiry(
-            { ...outData, user: userQuery },
-            "1m"
-          );
+          const data = encodeJWT({ ...outData, user: userQuery });
           res.cookie("x-poap-auth", data, {
             httpOnly: true,
             secure: true,
             domain: ".ss-tm.org",
             sameSite: "lax",
+            maxAge: 60 * 1000, // 1 minute
           });
         }
       }
