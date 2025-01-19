@@ -42,6 +42,7 @@ router.get("/jwt/:jwt", async (req, res) => {
     const nfc = result[0];
 
     const outData = {
+      uuid,
       chainId: nfc.chainId,
       phygital: {
         address: nfc.phyditalContract,
@@ -55,17 +56,16 @@ router.get("/jwt/:jwt", async (req, res) => {
 
     const redirectUrl = new URL(nfc.url);
     const jwtData = encodeJWT(outData);
-    redirectUrl.searchParams.set("NFT_JWT", jwtData);
 
-    if (
-      redirectUrl.toString().startsWith("https://id.ss-tm.org/user/register/")
-    ) {
+    if (redirectUrl.toString().endsWith("/user/register")) {
       res.cookie("x-nfc-auth", jwtData, {
         httpOnly: true,
         secure: true,
         domain: ".ss-tm.org",
         sameSite: "lax",
       });
+    } else {
+      redirectUrl.searchParams.set("NFT_JWT", jwtData);
     }
 
     return res.redirect(redirectUrl.toString());
