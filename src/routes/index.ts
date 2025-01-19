@@ -60,6 +60,21 @@ router.get("/jwt/:jwt", async (req, res) => {
     if (
       redirectUrl.toString().startsWith("https://id.ss-tm.org/user/register/")
     ) {
+      const userQuery = await db
+        .select()
+        .from(users)
+        .where(eq(users.nfc, uuid));
+      if (userQuery.length === 1) {
+        console.log("User already exists, updating redirect");
+        const username = userQuery[0].username;
+        const newUrl = `https://id.ss-tm.org/user/${username}`;
+        await db
+          .update(redirects)
+          .set({ url: newUrl })
+          .where(eq(redirects.uuid, uuid));
+        redirectUrl.href = newUrl;
+      }
+
       console.log("Setting cookie");
       res.cookie("x-nfc-auth", jwtData, {
         httpOnly: true,
