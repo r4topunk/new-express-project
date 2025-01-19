@@ -24,3 +24,16 @@ export function encodeJWT(json: Record<string, any>): string {
   const token = jwt.sign(json, JWT_SECRET_KEY, { noTimestamp: true });
   return token;
 }
+
+/**
+ * returns a signed base64 string with an expiration time
+ * @param json
+ * @param expiresIn
+ */
+export function encodeJWTWithExpiry(
+  json: Record<string, any>,
+  expiresIn: string | number
+): string {
+  const token = jwt.sign(json, JWT_SECRET_KEY, { expiresIn });
+  return token;
+}

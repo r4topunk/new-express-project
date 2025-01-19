@@ -5,7 +5,12 @@ import httpStatus from "http-status";
 
 import { db } from "../drizzle/index";
 import { redirects } from "../drizzle/schema/redirects";
-import { decodeJWT, encodeJWT, JWTCustomToken } from "../utils/JWTRoutes";
+import {
+  decodeJWT,
+  encodeJWT,
+  encodeJWTWithExpiry,
+  JWTCustomToken,
+} from "../utils/JWTRoutes";
 import "dotenv/config";
 import { authenticateJWT } from "../middlewares/jwtAuth";
 import { users } from "../drizzle/schema/users";
@@ -57,33 +62,50 @@ router.get("/jwt/:jwt", async (req, res) => {
     const redirectUrl = new URL(nfc.url);
     const jwtData = encodeJWT(outData);
 
-    if (
-      redirectUrl.toString().startsWith("https://id.ss-tm.org/user/register/")
-    ) {
+    if (redirectUrl.toString().startsWith("https://id.ss-tm.org/user")) {
       const userQuery = await db
         .select()
         .from(users)
         .where(eq(users.nfc, uuid));
-      if (userQuery.length === 1) {
-        console.log("User already exists, updating redirect");
-        const username = userQuery[0].username;
-        const newUrl = `https://id.ss-tm.org/user/${username}`;
-        await db
-          .update(redirects)
-          .set({ url: newUrl })
-          .where(eq(redirects.uuid, uuid));
-        redirectUrl.href = newUrl;
-      } else {
-        console.log("User does not exist, redirecting to register");
-      }
+      const userExists = userQuery.length === 1;
 
-      console.log("Setting cookie");
-      res.cookie("x-nfc-auth", jwtData, {
-        httpOnly: true,
-        secure: true,
-        domain: ".ss-tm.org",
-        sameSite: "lax",
-      });
+      if (
+        redirectUrl.toString().startsWith("https://id.ss-tm.org/user/register")
+      ) {
+        if (userExists) {
+          console.log("User already exists, updating redirect");
+          const username = userQuery[0].username;
+          const newUrl = `https://id.ss-tm.org/user/${username}`;
+          await db
+            .update(redirects)
+            .set({ url: newUrl })
+            .where(eq(redirects.uuid, uuid));
+          redirectUrl.href = newUrl;
+        } else {
+          console.log("User does not exist, redirecting to register");
+          console.log("Setting cookie");
+          res.cookie("x-nfc-auth", jwtData, {
+            httpOnly: true,
+            secure: true,
+            domain: ".ss-tm.org",
+            sameSite: "lax",
+          });
+        }
+      } else {
+        if (userExists) {
+          console.log("Setting cookie for poap claiming");
+          const data = encodeJWTWithExpiry(
+            { ...outData, user: userQuery },
+            "1m"
+          );
+          res.cookie("x-poap-auth", data, {
+            httpOnly: true,
+            secure: true,
+            domain: ".ss-tm.org",
+            sameSite: "lax",
+          });
+        }
+      }
     } else {
       redirectUrl.searchParams.set("NFT_JWT", jwtData);
     }
@@ -254,6 +276,39 @@ router.get("/user/nfc/:uuid", async (req, res) => {
     return res.status(httpStatus.OK).json({
       message: "User found",
       user: userQuery[0],
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: "An error occurred",
+    });
+  }
+});
+
+router.get("/redirect/:uuid/poap", async (req, res) => {
+  try {
+    const { uuid } = req.params;
+    // fetch user POAP from the 'redirects' table
+    const redirectQuery = await db
+      .select()
+      .from(redirects)
+      .where(eq(redirects.uuid, uuid));
+    if (redirectQuery.length === 0) {
+      return res.status(httpStatus.NOT_FOUND).json({
+        message: "User POAP not found",
+      });
+    }
+
+    const { poapContract, poapTokenId, chainId } = redirectQuery[0];
+    const poapData = {
+      address: poapContract,
+      tokenId: poapTokenId,
+      chainId,
+    };
+
+    return res.status(httpStatus.OK).json({
+      message: "User POAP found",
+      data: poapData,
     });
   } catch (error) {
     console.error(error);
