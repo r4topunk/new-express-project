@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import express from "express";
 import "express-async-errors";
 import httpStatus from "http-status";
@@ -9,6 +9,8 @@ import { redirects } from "../drizzle/schema/redirects";
 import { users } from "../drizzle/schema/users";
 import { authenticateJWT } from "../middlewares/jwtAuth";
 import { decodeJWT, encodeJWT, JWTCustomToken } from "../utils/JWTRoutes";
+import { nftClaims } from "../drizzle/schema/nftClaims";
+import { equal } from "node:assert";
 
 const router = express.Router();
 
@@ -334,6 +336,114 @@ router.post("/user", authenticateJWT, async (req, res) => {
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
       message: "An error occurred",
       data: null,
+    });
+  }
+});
+
+router.post("/claim-nft", authenticateJWT, async (req, res) => {
+  try {
+    const { user_address, token_address, token_id, chain_id } = req.body;
+    console.log("Claiming nft for:", {
+      user_address,
+      token_address,
+      token_id,
+      chain_id,
+    });
+
+    if (!user_address || !token_address || !token_id || !chain_id) {
+      return res.status(httpStatus.BAD_REQUEST).json({
+        message: "Invalid input data",
+        data: null,
+      });
+    }
+
+    const result = await db
+      .insert(nftClaims)
+      .values({
+        user_address,
+        token_address,
+        token_id,
+        chain_id,
+      })
+      .returning();
+
+    return res.status(httpStatus.OK).json({
+      message: "NFT claim recorded",
+      data: result,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: "An error occurred",
+      data: null,
+    });
+  }
+});
+
+router.post("/tokengate", authenticateJWT, async (req, res) => {
+  try {
+    const { user_address } = req.body;
+    const jwt = req.jwt as JWTCustomToken;
+    const [redirect] = await db
+      .select()
+      .from(redirects)
+      .where(eq(redirects.uuid, jwt.uuid));
+    if (!redirect) {
+      return res.status(httpStatus.NOT_FOUND).json({
+        message: "Redirect not found",
+        hasToken: false,
+      });
+    }
+
+    const { chainId, poapContract, poapTokenId } = redirect;
+
+    console.log("Checking token claim for:", {
+      user_address,
+      chainId,
+      poapContract,
+      poapTokenId,
+    });
+
+    if (!user_address || !poapContract || !poapTokenId || !chainId) {
+      return res.status(httpStatus.BAD_REQUEST).json({
+        message: "Invalid input data",
+        hasToken: false,
+      });
+    }
+
+    const [claim] = await db
+      .select()
+      .from(nftClaims)
+      .where(
+        and(
+          eq(nftClaims.user_address, user_address),
+          eq(nftClaims.token_address, poapContract),
+          eq(nftClaims.token_id, poapTokenId),
+          eq(nftClaims.chain_id, chainId)
+        )
+      );
+
+    if (claim) {
+      return res.status(httpStatus.OK).json({
+        message: "Token claim exists",
+        hasToken: true,
+      });
+    } else {
+      return res.status(httpStatus.OK).json({
+        message: "Token claim does not exist",
+        hasToken: false,
+        poap: {
+          address: poapContract,
+          tokenId: poapTokenId,
+          chainId,
+        },
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: "An error occurred",
+      hasToken: false,
     });
   }
 });
