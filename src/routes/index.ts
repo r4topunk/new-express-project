@@ -380,6 +380,67 @@ router.post("/claim-nft", authenticateJWT, async (req, res) => {
   }
 });
 
+router.post("/tokengate/uuid", async (req, res) => {
+  const { uuid, user_address } = req.body;
+  console.log("Checking token claim for:", { uuid, user_address });
+
+  try {
+    // Fetch the redirect data using the uuid
+    const [redirect] = await db
+      .select()
+      .from(redirects)
+      .where(eq(redirects.uuid, uuid));
+
+    if (
+      !redirect ||
+      !redirect.poapContract ||
+      !redirect.poapTokenId ||
+      !redirect.chainId
+    ) {
+      return res.status(httpStatus.NOT_FOUND).json({
+        message: "POAP data not found for the given UUID",
+        hasToken: false,
+      });
+    }
+
+    // Check if the user has claimed the token
+    const [claim] = await db
+      .select()
+      .from(nftClaims)
+      .where(
+        and(
+          eq(nftClaims.user_address, user_address),
+          eq(nftClaims.token_address, redirect.poapContract),
+          eq(nftClaims.token_id, redirect.poapTokenId),
+          eq(nftClaims.chain_id, redirect.chainId)
+        )
+      );
+
+    if (claim) {
+      return res.status(httpStatus.OK).json({
+        message: "Token claim exists",
+        hasToken: true,
+      });
+    } else {
+      return res.status(httpStatus.OK).json({
+        message: "Token claim does not exist",
+        hasToken: false,
+        poap: {
+          address: redirect.poapContract,
+          tokenId: redirect.poapTokenId,
+          chainId: redirect.chainId,
+        },
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: "An error occurred",
+      hasToken: false,
+    });
+  }
+});
+
 router.post("/tokengate", authenticateJWT, async (req, res) => {
   try {
     const { user_address } = req.body;
