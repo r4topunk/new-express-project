@@ -57,7 +57,10 @@ router.get("/jwt/:jwt", async (req, res) => {
     const redirectUrl = new URL(nfc.url);
     const jwtData = encodeJWT(outData);
 
-    if (redirectUrl.toString().endsWith("/user/register")) {
+    if (
+      redirectUrl.toString().startsWith("https://id.ss-tm.org/user/register/")
+    ) {
+      console.log("Setting cookie");
       res.cookie("x-nfc-auth", jwtData, {
         httpOnly: true,
         secure: true,
