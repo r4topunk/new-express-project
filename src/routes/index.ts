@@ -57,6 +57,15 @@ router.get("/jwt/:jwt", async (req, res) => {
     const jwtData = encodeJWT(outData);
     redirectUrl.searchParams.set("NFT_JWT", jwtData);
 
+    if (
+      redirectUrl.toString().startsWith("https://id.ss-tm.org/user/register/")
+    ) {
+      console.log("Setting cookie", redirectUrl.toString());
+      res.cookie("x-nft-auth", jwtData, { httpOnly: true, secure: true });
+    } else {
+      console.log("No setting cookie", redirectUrl.toString());
+    }
+
     return res.redirect(redirectUrl.toString());
   } catch (error) {
     console.error(error);
