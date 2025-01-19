@@ -216,6 +216,31 @@ router.put("/redirects/:uuid", authenticateJWT, async (req, res) => {
   }
 });
 
+router.get("/user/:username", async (req, res) => {
+  try {
+    const { username } = req.params;
+    const userQuery = await db
+      .select()
+      .from(users)
+      .where(eq(users.username, username));
+    if (userQuery.length === 0) {
+      return res.status(httpStatus.NOT_FOUND).json({
+        message: "User not found",
+      });
+    }
+
+    return res.status(httpStatus.OK).json({
+      message: "User found",
+      user: userQuery[0],
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: "An error occurred",
+    });
+  }
+});
+
 router.post("/user", authenticateJWT, async (req, res) => {
   try {
     const data = req.body;
