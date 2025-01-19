@@ -83,6 +83,7 @@ router.get("/jwt/:jwt", async (req, res) => {
 router.get("/auth", authenticateJWT, async (req, res) => {
   return res.status(httpStatus.OK).json({
     message: "You are authenticated " + req.jwt?.uuid,
+    jwt: req.jwt,
   });
 });
 
