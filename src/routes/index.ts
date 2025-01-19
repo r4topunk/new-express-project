@@ -171,13 +171,10 @@ router.post("/user", authenticateJWT, async (req, res) => {
         set: data,
       })
       .returning();
-    console.log({ result });
 
     return res.status(httpStatus.OK).json({
       message: "User found",
-      data: {
-        data,
-      },
+      data: result,
     });
   } catch (error) {
     console.error(error);
