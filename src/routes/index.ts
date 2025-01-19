@@ -95,7 +95,7 @@ router.get("/jwt/:jwt", async (req, res) => {
             secure: true,
             domain: ".ss-tm.org",
             sameSite: "lax",
-            maxAge: 60 * 1000, // 1 minute
+            maxAge: 5 * 60 * 1000, // 5 minutes
           });
         }
       }
