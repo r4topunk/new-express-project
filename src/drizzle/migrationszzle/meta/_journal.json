@@ -8,6 +8,13 @@
       "when": 1733958213526,
       "tag": "0000_gray_madelyne_pryor",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1737252321083,
+      "tag": "0001_gifted_lady_vermin",
+      "breakpoints": true
     }
   ]
 }

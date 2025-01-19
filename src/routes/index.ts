@@ -8,6 +8,7 @@ import { redirects } from "../drizzle/schema/redirects";
 import { decodeJWT, encodeJWT, JWTCustomToken } from "../utils/JWTRoutes";
 import "dotenv/config";
 import { authenticateJWT } from "../middlewares/jwtAuth";
+import { users } from "../drizzle/schema/users";
 
 const router = express.Router();
 
@@ -147,6 +148,36 @@ router.put("/redirects/:uuid", authenticateJWT, async (req, res) => {
     return res.status(httpStatus.OK).json({
       message: "Redirect updated successfully",
       data: result,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: "An error occurred",
+      data: null,
+    });
+  }
+});
+
+router.post("/user", authenticateJWT, async (req, res) => {
+  try {
+    const data = req.body;
+    console.log({ data });
+
+    const result = await db
+      .insert(users)
+      .values(data)
+      .onConflictDoUpdate({
+        target: users.nfc,
+        set: data,
+      })
+      .returning();
+    console.log({ result });
+
+    return res.status(httpStatus.OK).json({
+      message: "User found",
+      data: {
+        data,
+      },
     });
   } catch (error) {
     console.error(error);
