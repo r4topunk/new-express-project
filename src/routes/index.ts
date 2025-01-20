@@ -5,12 +5,12 @@ import httpStatus from "http-status";
 
 import "dotenv/config";
 import { db } from "../drizzle/index";
+import { nftClaims } from "../drizzle/schema/nftClaims";
 import { redirects } from "../drizzle/schema/redirects";
 import { users } from "../drizzle/schema/users";
 import { authenticateJWT } from "../middlewares/jwtAuth";
 import { decodeJWT, encodeJWT, JWTCustomToken } from "../utils/JWTRoutes";
-import { nftClaims } from "../drizzle/schema/nftClaims";
-import { equal } from "node:assert";
+import userRouter from "./user";
 
 const router = express.Router();
 
@@ -512,4 +512,5 @@ router.post("/tokengate", authenticateJWT, async (req, res) => {
   }
 });
 
+router.use("/user", userRouter);
 export default router;
