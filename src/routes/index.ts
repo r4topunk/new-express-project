@@ -156,7 +156,7 @@ router.get("/redirects", authenticateJWT, async (req, res) => {
       .from(redirects)
       .orderBy(redirects.createdAt);
     // const BASE_HOST = `${req.protocol}://${req.get("host")}`;
-    const BASE_HOST = `${req.get("host")}`;
+    const BASE_HOST = `https://${req.get("host")}`;
     const buildLink = (jwt: Record<string, any>) =>
       `${BASE_HOST}/jwt/${encodeJWT({ uuid: jwt.uuid })}`;
     const results = result.map((row) => ({
@@ -185,7 +185,7 @@ router.post("/redirects", authenticateJWT, async (req, res) => {
 
     const result = await db.insert(redirects).values(redirectsData).returning();
     // const BASE_HOST = `${req.protocol}://${req.get("host")}`;
-    const BASE_HOST = `${req.get("host")}`;
+    const BASE_HOST = `https://${req.get("host")}`;
     const buildLink = (uuid: string) =>
       `${BASE_HOST}/jwt/${encodeJWT({ uuid })}`;
     const resultsWithLinks = result.map((row) => ({
