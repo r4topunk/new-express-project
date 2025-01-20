@@ -131,6 +131,7 @@ router.get("/auth/user", authenticateJWT, async (req, res) => {
     if (userQuery.length === 0) {
       return res.status(httpStatus.OK).json({
         message: "User not found",
+        jwt: req.jwt,
       });
     }
 
