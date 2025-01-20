@@ -129,7 +129,7 @@ router.get("/auth/user", authenticateJWT, async (req, res) => {
       .from(users)
       .where(eq(users.nfc, jwt.uuid));
     if (userQuery.length === 0) {
-      return res.status(httpStatus.NOT_FOUND).json({
+      return res.status(httpStatus.OK).json({
         message: "User not found",
       });
     }
