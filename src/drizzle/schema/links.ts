@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, uuid, timestamp, integer } from "drizzle-orm/pg-core";
+import { boolean, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
 export const links = pgTable("links", {
@@ -8,6 +8,7 @@ export const links = pgTable("links", {
   description: text("description").notNull(),
   link: text("link").notNull(),
   created_at: timestamp("created_at").defaultNow(),
+  secret: boolean("secret").default(false),
 });
 
 export const linksRelations = relations(links, ({ one }) => ({
