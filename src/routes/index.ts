@@ -256,7 +256,9 @@ router.get("/user/:username", async (req, res) => {
     }
 
     const user = userQuery[0].user;
-    const userLinks = userQuery.map((row) => row.link);
+    const userLinks = userQuery
+      .map((row) => row.link)
+      .filter((link) => link !== null);
 
     return res.status(httpStatus.OK).json({
       message: "User found",
