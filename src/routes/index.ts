@@ -488,7 +488,12 @@ router.post("/tokengate", authenticateJWT, async (req, res) => {
       poapTokenId,
     });
 
-    if (!user_address || !poapContract || !poapTokenId || !chainId) {
+    if (
+      !user_address ||
+      !poapContract ||
+      typeof poapTokenId !== "number" ||
+      !chainId
+    ) {
       return res.status(httpStatus.BAD_REQUEST).json({
         message: "Invalid input data",
         hasToken: false,
