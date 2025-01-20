@@ -11,6 +11,7 @@ import { users } from "../drizzle/schema/users";
 import { authenticateJWT } from "../middlewares/jwtAuth";
 import { decodeJWT, encodeJWT, JWTCustomToken } from "../utils/JWTRoutes";
 import userRouter from "./user";
+import { links } from "../drizzle/schema/links";
 
 const router = express.Router();
 
@@ -240,18 +241,29 @@ router.get("/user/:username", async (req, res) => {
   try {
     const { username } = req.params;
     const userQuery = await db
-      .select()
+      .select({
+        user: users,
+        link: links,
+      })
       .from(users)
+      .leftJoin(links, eq(links.user_id, users.id))
       .where(eq(users.username, username));
+
     if (userQuery.length === 0) {
       return res.status(httpStatus.NOT_FOUND).json({
         message: "User not found",
       });
     }
 
+    const user = userQuery[0].user;
+    const userLinks = userQuery.map((row) => row.link);
+
     return res.status(httpStatus.OK).json({
       message: "User found",
-      user: userQuery[0],
+      user: {
+        ...user,
+        links: userLinks,
+      },
     });
   } catch (error) {
     console.error(error);
