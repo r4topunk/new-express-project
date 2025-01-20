@@ -367,7 +367,12 @@ router.post("/claim-nft", authenticateJWT, async (req, res) => {
       chain_id,
     });
 
-    if (!user_address || !token_address || !token_id || !chain_id) {
+    if (
+      !user_address ||
+      !token_address ||
+      typeof token_id !== "number" ||
+      !chain_id
+    ) {
       console.log("Invalid input data", {
         user_address,
         token_address,
