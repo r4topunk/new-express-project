@@ -335,6 +335,11 @@ router.post("/user", authenticateJWT, async (req, res) => {
     const data = req.body;
     console.log({ data });
 
+    const userSelect = await db
+      .select()
+      .from(users)
+      .where(eq(users.nfc, data.nfc));
+
     const result = await db
       .insert(users)
       .values(data)
@@ -347,6 +352,7 @@ router.post("/user", authenticateJWT, async (req, res) => {
     return res.status(httpStatus.OK).json({
       message: "User found",
       data: result,
+      userCreated: userSelect.length === 0,
     });
   } catch (error) {
     console.error(error);
