@@ -210,8 +210,9 @@ router.put("/redirects/:uuid", authenticateJWT, async (req, res) => {
   try {
     const { uuid } = req.params;
     const updateData = req.body;
+    console.log("Updating redirect", { uuid, updateData });
 
-    const result = await db
+    const [result] = await db
       .update(redirects)
       .set(updateData)
       .where(eq(redirects.uuid, uuid))
@@ -340,7 +341,9 @@ router.post("/user", authenticateJWT, async (req, res) => {
       .from(users)
       .where(eq(users.nfc, data.nfc));
 
-    const result = await db
+    console.log({ userSelect });
+
+    const [result] = await db
       .insert(users)
       .values(data)
       .onConflictDoUpdate({
@@ -349,10 +352,12 @@ router.post("/user", authenticateJWT, async (req, res) => {
       })
       .returning();
 
+    const userCreated = userSelect.length === 0;
+
     return res.status(httpStatus.OK).json({
-      message: "User found",
+      message: userCreated ? "User created" : "User updated",
       data: result,
-      userCreated: userSelect.length === 0,
+      userCreated,
     });
   } catch (error) {
     console.error(error);
