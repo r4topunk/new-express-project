@@ -12,6 +12,7 @@ import { authenticateJWT } from "../middlewares/jwtAuth";
 import { decodeJWT, encodeJWT, JWTCustomToken } from "../utils/JWTRoutes";
 import userRouter from "./user";
 import { links } from "../drizzle/schema/links";
+import modalleRoute from "./modalle";
 
 const router = express.Router();
 
@@ -554,4 +555,5 @@ router.post("/tokengate", authenticateJWT, async (req, res) => {
 });
 
 router.use("/user", userRouter);
+router.use("/modalle", modalleRoute);
 export default router;
