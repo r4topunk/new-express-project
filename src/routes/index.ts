@@ -8,6 +8,7 @@ import { db } from "../drizzle/index";
 import { nftClaims } from "../drizzle/schema/nftClaims";
 import { redirects } from "../drizzle/schema/redirects";
 import { users } from "../drizzle/schema/users";
+import { projects } from "../drizzle/schema/projects"; // new import
 import { authenticateJWT } from "../middlewares/jwtAuth";
 import { decodeJWT, encodeJWT, JWTCustomToken } from "../utils/JWTRoutes";
 import userRouter from "./user";
@@ -152,19 +153,22 @@ router.get("/auth/user", authenticateJWT, async (req, res) => {
 
 router.get("/redirects", authenticateJWT, async (req, res) => {
   try {
-    const result = await db
-      .select()
+    // join projects table based on projectId
+    const results = await db
+      .select({ redirect: redirects, project: projects })
       .from(redirects)
+      .leftJoin(projects, eq(redirects.projectId, projects.id))
       .orderBy(redirects.createdAt);
-    // const BASE_HOST = `${req.protocol}://${req.get("host")}`;
+
     const BASE_HOST = `https://${req.get("host")}`;
     const buildLink = (jwt: Record<string, any>) =>
       `${BASE_HOST}/jwt/${encodeJWT({ uuid: jwt.uuid })}`;
-    const results = result.map((row) => ({
-      ...row,
-      link: buildLink(row),
+    const resultsWithLinks = results.map(({ redirect, project }) => ({
+      ...redirect,
+      project,
+      link: buildLink(redirect),
     }));
-    res.status(httpStatus.OK).json(results);
+    res.status(httpStatus.OK).json(resultsWithLinks);
   } catch (error) {
     console.error(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
