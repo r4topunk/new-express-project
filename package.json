@@ -6,6 +6,7 @@
     "dev": "tsx ./api/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "drizzle:generate": "drizzle-kit generate",
+    "drizzle:pull": "drizzle-kit pull",
     "drizzle:push": "drizzle-kit push",
     "drizzle:seed": "tsx ./src/drizzle/seed.ts"
   },

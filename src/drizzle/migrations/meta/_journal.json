@@ -1,12 +1,12 @@
 {
-  "version": "5",
-  "dialect": "pg",
+  "version": "7",
+  "dialect": "postgresql",
   "entries": [
     {
       "idx": 0,
-      "version": "5",
-      "when": 1726617136682,
-      "tag": "0000_first_gauntlet",
+      "version": "7",
+      "when": 1739192140551,
+      "tag": "0000_yellow_marrow",
       "breakpoints": true
     }
   ]
