@@ -62,6 +62,9 @@ router.get("/jwt/:jwt", async (req, res) => {
     const redirectUrl = new URL(nfc.url);
     const jwtData = encodeJWT(outData);
 
+    // Extract cookie domain from redirect URL
+    const cookieDomain = redirectUrl.hostname.split(".").slice(-2).join(".");
+
     if (redirectUrl.toString().startsWith("https://id.ss-tm.org/user")) {
       const userQuery = await db
         .select()
@@ -87,7 +90,7 @@ router.get("/jwt/:jwt", async (req, res) => {
           res.cookie("x-nfc-auth", jwtData, {
             httpOnly: true,
             secure: true,
-            domain: ".ss-tm.org",
+            domain: cookieDomain,
             sameSite: "lax",
           });
         }
@@ -98,7 +101,7 @@ router.get("/jwt/:jwt", async (req, res) => {
           res.cookie("x-poap-auth", data, {
             httpOnly: true,
             secure: true,
-            domain: ".ss-tm.org",
+            domain: cookieDomain,
             sameSite: "lax",
             maxAge: 5 * 60 * 1000, // 5 minutes
           });
@@ -107,11 +110,9 @@ router.get("/jwt/:jwt", async (req, res) => {
     } else {
       redirectUrl.searchParams.set("NFT_JWT", jwtData);
       res.cookie("x-nfc-auth", jwtData, {
-        domain: ".modalle.digital",
-        path: "/",
         secure: true,
-        httpOnly: true,
-        sameSite: "none",
+        sameSite: "lax",
+        domain: cookieDomain,
       });
     }
 
