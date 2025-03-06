@@ -107,6 +107,7 @@ router.get("/jwt/:jwt", async (req, res) => {
     } else {
       redirectUrl.searchParams.set("NFT_JWT", jwtData);
       res.cookie("x-nfc-auth", jwtData, {
+        domain: ".modalle.digital",
         path: "/",
         secure: true,
         httpOnly: true,
