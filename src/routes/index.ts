@@ -107,8 +107,10 @@ router.get("/jwt/:jwt", async (req, res) => {
     } else {
       redirectUrl.searchParams.set("NFT_JWT", jwtData);
       res.cookie("x-nfc-auth", jwtData, {
+        path: "/",
         secure: true,
-        sameSite: "lax",
+        httpOnly: true,
+        sameSite: "none",
       });
     }
 
