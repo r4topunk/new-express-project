@@ -113,6 +113,7 @@ router.get("/jwt/:jwt", async (req, res) => {
         secure: true,
         sameSite: "lax",
         domain: cookieDomain,
+        maxAge: 60 * 1000, // expires in 1 minute (60 seconds)
       });
     }
 
