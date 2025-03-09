@@ -51,6 +51,19 @@ router.get("/jwt/:jwt", async (req, res) => {
     };
 
     const redirectUrl = new URL(nfc.url);
+
+    // Check if this is a redirect to modalle.digital from redirect.ss-tm.org
+    const requestHost = req.headers.host || "";
+    if (
+      requestHost.includes("redirect.ss-tm.org") &&
+      redirectUrl.hostname.includes("modalle.digital")
+    ) {
+      // Redirect through the modalle redirect service
+      const modalleRedirectUrl = `https://redirect.modalle.digital/jwt/${req.params.jwt}`;
+      return res.redirect(modalleRedirectUrl);
+    }
+
+    // Continue with original redirect logic
     const jwtData = encodeJWT(outData);
 
     // Extract cookie domain from redirect URL
